@@ -40,6 +40,8 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func setupRoutes() {
+	fs := http.FileServer(http.Dir("public"))
+	http.Handle("/", fs)
 	// add route
 	http.HandleFunc("/upload", uploadFile)
 	fmt.Println("Server is up and running!")
