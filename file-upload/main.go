@@ -12,7 +12,6 @@ import (
 
 type Transer struct {
 	ID       uint   `json:"id"`
-	Note     string `json:"note"`
 	Filename string `json:"filename"`
 	Filesize int64  `json:"filesize"`
 }
@@ -50,6 +49,13 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 	tempFile.Write(fileBytes)
 
+	logItem := &Transer{
+		Filename: handler.Filename,
+		Filesize: handler.Size,
+	}
+
+	db.Create(&logItem)
+
 	fmt.Println("File upload successfull")
 }
 
@@ -81,6 +87,7 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/transers", getTransfers)
+	router.DELETE("/transfer/:id", deleteTransferEntry)
 
 	// init routes
 	setupRoutes()
@@ -93,4 +100,14 @@ func getTransfers(c *gin.Context) {
 	} else {
 		c.JSON(200, transfers)
 	}
+}
+
+func deleteTransferEntry(c *gin.Context) {
+	id := c.Params.ByName("id")
+	var transfer Transer
+
+	d := db.Where("id = ?", id).Delete(&transfer)
+	fmt.Println(d)
+
+	c.JSON(200, gin.H{"id #" + id: "deleted"})
 }
